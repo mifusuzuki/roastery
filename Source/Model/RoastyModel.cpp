@@ -4,14 +4,6 @@
 #include <iostream>
 #include <string>
 
-/*
-void* operator new(size_t size)
-{
-    std::cout << "Allocating " << size << " bytes\n";
-    return malloc(size);
-}
-*/
-
 /* ============== Bean ================= */
 
 /* user-defined constructor */
@@ -27,29 +19,34 @@ std::string Bean::getName() const
 
 /* ============== Ingredients ================ */
 
-/* assignment-operator overload */
-Ingredient& Ingredient::operator=(Ingredient const& other)
-{
-    if (this == &other)
-    {
-        return *this;
-    }
-    this->bean = new Bean(*other.bean);
-    this->amount = other.amount;
-    return *this;
-}
-
-/* copy-constructor */
-Ingredient::Ingredient(Ingredient const& other)
-{
-    *this = other;
-}
-
 /* user-defined constructor */
 Ingredient::Ingredient(const Bean& inputBean, int inputAmount) 
 {
     bean = &inputBean; 
     amount = inputAmount;
+}
+
+/* copy-constructor */
+Ingredient::Ingredient(Ingredient const& other)
+{
+    this->bean = new Bean(*other.bean);
+    this->amount = other.amount;
+}
+
+/* assignment-operator overload */
+Ingredient& Ingredient::operator=(Ingredient const& other)
+{
+    /* check if this and other are the identical */
+    if (this == &other)
+    {
+        return *this;
+    }
+    /* delete the existing Bean object */
+    delete this->bean;
+    /* assign new data */
+    this->bean = new Bean(*other.bean);
+    this->amount = other.amount;
+    return *this;
 }
 
 Ingredient::~Ingredient()
@@ -82,14 +79,19 @@ int EventValue::getValue() const
 
 /* ============== Event ================ */
 
-/* assignment-operator overload */
-Event& Event::operator=(Event const& other)
+/* user-defined constructor */
+Event::Event(std::string inputType, long inputTimestamp, EventValue* inputEventValue) 
 {
-    if (this == &other)
-    {
-        return *this;
-    }
+    type = inputType; 
+    timestamp = inputTimestamp; 
+    eventValue = inputEventValue; 
+}
+
+/* copy-constructor */
+Event::Event(Event const& other)
+{
     this->timestamp = other.timestamp;
+    this->type = other.type;
     if (other.eventValue == nullptr)
     {
         eventValue = nullptr;
@@ -98,22 +100,28 @@ Event& Event::operator=(Event const& other)
     {
         this->eventValue = new EventValue(*other.eventValue);
     }
+}
+
+/* assignment-operator overload */
+Event& Event::operator=(Event const& other)
+{
+    /* check if this and other are the identical */
+    if (this == &other)
+    {
+        return *this;
+    }
+    /* assign new data */
+    this->timestamp = other.timestamp;
     this->type = other.type;
+    if (other.eventValue == nullptr)
+    {
+        eventValue = nullptr;
+    }
+    else
+    {
+        this->eventValue = new EventValue(*other.eventValue);
+    }
     return *this;
-}
-
-/* copy-constructor */
-Event::Event(Event const& other)
-{
-    *this = other;
-}
-
-/* user-defined constructor */
-Event::Event(std::string inputType, long inputTimestamp, EventValue* inputEventValue) 
-{
-    type = inputType; 
-    timestamp = inputTimestamp; 
-    eventValue = inputEventValue; 
 }
 
 Event::~Event()
@@ -181,7 +189,7 @@ Roast& Roast::operator=(Roast const& other)
     {
         return *this;
     }
-    /* delete the existing (if any) objects */
+    /* delete the existing objects (if any) */
     for (auto i=0; i<(this->eventCount); i++)
     {
         delete this->eventArray[i];
@@ -190,7 +198,7 @@ Roast& Roast::operator=(Roast const& other)
     {
         delete this->ingredientArray[i];
     }
-    /* copy! */
+    /* assign new data */
     this->eventCount = other.eventCount;
     this->roastId = other.roastId; 
     this->beginTimestamp = other.beginTimestamp;
@@ -213,11 +221,13 @@ Roast::~Roast()
     {
         delete eventArray[i];
     }
+    delete[] eventArray;
     /* delete all ingredients */
     for (int i=0; i<ingredientsCount; i++)
     {
         delete ingredientArray[i];
     }
+    delete[] ingredientArray;
 }
 
 long Roast::getId() const
@@ -242,18 +252,67 @@ long Roast::getTimestamp() const
 
 void Roast::addEvent(const Event& event) 
 {
-    // saving the object address in eventArray
-    // taking the address of object reference gives the address of the object
-    // since "applying the address-of operator to the reference is the same 
-    // as taking the address of the original object"
+    /* check the identical event does not exit already */
+    for (int ptr=0; ptr<eventCount; ptr++)
+    {
+        if (eventArray[ptr] == &event)
+        {
+            /* identical event object exits already */
+            /* deep copy it and add its address to the array */
+            addEvent(*(new Event{event}));
+            return;
+        }
+    }
+    
+    /* hit the cap limit - double the size of array and transfer data */  
+    const Event* * temp;
+    if (eventCount >= eventArrayCapacity)
+    {
+        temp = new const Event*[2*eventArrayCapacity];
+        for (int i=0; i<eventArrayCapacity; i++)
+        {
+            temp[i] = eventArray[i];
+        }
+        delete[] eventArray;
+        eventArrayCapacity *= 2;
+        eventArray = temp;
+    }
+
     eventArray[eventCount] = &event; 
     eventCount++;
+    return;
 }
 
 void Roast::addIngredient(const Ingredient& ingredient)
 {
-    ingredientArray[ingredientsCount] = &ingredient;
+    /* check the identical event does not exit already */
+    for (int ptr=0; ptr<ingredientsCount; ptr++)
+    {
+        if (ingredientArray[ptr] == &ingredient)
+        {
+            /* identical event object exits already */
+            /* deep copy it and add its address to the array */
+            addIngredient(*(new Ingredient{ingredient}));
+            return;
+        }
+    }
+    /* hit the cap limit - double the size of array and transfer data */  
+    const Ingredient* * temp;
+    if (ingredientsCount >= ingredientArrayCapacity)
+    {
+        temp = new const Ingredient*[2*ingredientArrayCapacity];
+        for (int i=0; i<ingredientArrayCapacity; i++)
+        {
+            temp[i] = ingredientArray[i];
+        }
+        delete[] ingredientArray;
+        ingredientArrayCapacity *= 2;
+        ingredientArray = temp;
+    }
+
+    ingredientArray[ingredientsCount] = &ingredient; 
     ingredientsCount++;
+    return;
 }
 
 void Roast::removeEventByTimestamp(long eventTimestamp)
@@ -262,7 +321,7 @@ void Roast::removeEventByTimestamp(long eventTimestamp)
     {
         if ((eventArray[i] != nullptr) && (eventArray[i]->getTimestamp() == eventTimestamp))
         {
-            delete eventArray[i]; // deletes event
+            delete eventArray[i];
             eventCount--;
             for (int j=i; j<eventCount; j++)
             {
@@ -283,7 +342,7 @@ void Roast::removeIngredientByBeanName(std::string beanName)
         if ((ingredientArray[i] != nullptr) && (ingredientArray[i]->getBean().getName() == beanName))
         {
             /* remove this event and replace it with last event in the array*/
-            delete ingredientArray[i]; // deletes ingredient object and its bean object
+            delete ingredientArray[i]; 
             ingredientsCount--;
             for (int j=i; j<ingredientsCount; j++)
             {

@@ -3,8 +3,7 @@
 
 #include <string>
 
-#define EVENT_ARRAY_SIZE 200
-#define INGREDIENT_ARRAY_SIZE 200
+#define INITIAL_ARRAY_SIZE 2
 #define DEFAULT_EVENT_VALUE 0
 
 /* ============== Bean ================= */
@@ -18,12 +17,13 @@ private:
 };
 
 /* ============== Ingredients ================ */
-class Ingredient
+
+class Ingredient // Ingredient owns Bean class objects
 {
 public:
-    Ingredient& operator=(Ingredient const& other); // overload assignment operator
+    Ingredient(const Bean& inputBean, int inputNewAmount); // user-dfined constructor 
     Ingredient(Ingredient const& other); // copy-constructor
-    Ingredient(const Bean& inputBean, int inputNewAmount); // constructor 
+    Ingredient& operator=(Ingredient const& other); // overload assignment operator
     ~Ingredient(); // destructor
     int getAmount() const; 
     Bean const& getBean() const;
@@ -33,6 +33,7 @@ private:
 };
 
 // ============== Event Value ================ */
+
 class EventValue
 {
 public:
@@ -43,12 +44,13 @@ private:
 };
 
 /* ============== Event ================ */
-class Event
+
+class Event // Event owns EventValue class objects
 {
 public:
-    Event& operator=(Event const& other); // overload assignment operator
+    Event(std::string inputType, long inputTimestamp, EventValue* inputEventValue = nullptr); // user-defined constructor
     Event(Event const& other); // copy-constructor
-    Event(std::string inputType, long inputTimestamp, EventValue* inputEventValue = nullptr); // constructor
+    Event& operator=(Event const& other); // overload assignment operator
     ~Event(); // destructor
     bool hasValue()const; 
     long getTimestamp() const; 
@@ -63,28 +65,31 @@ private:
 };
 
 /* ============== Roasts ================ */
-class Roast 
+
+class Roast // Roast owns Ingredient and Event class objects
 {
 public:
-    Roast& operator=(Roast const& other); // overload assignment operator
+    Roast(long inputId, long inputBeginTimestamp); // user-defined constructor
     Roast(Roast const& other); // copy-constructor
-    Roast(long inputId, long inputBeginTimestamp); // constructor
+    Roast& operator=(Roast const& other); // overload assignment operator
     ~Roast(); // destructor
     long getId() const; 
     int getIngredientsCount() const; 
     int getEventCount() const; 
     long getTimestamp() const; 
-    void addEvent(const Event& event); // i dont think the function needs to be const
+    void addEvent(const Event& event); 
     void addIngredient(const Ingredient& ingredient); 
     void removeEventByTimestamp(long eventTimestamp); 
     void removeIngredientByBeanName(std::string beanName); 
-    Event const& getEvent(int number) const; // needs to return reference
-    Ingredient const& getIngredient(int number) const; // needs to return reference
+    Event const& getEvent(int number) const; 
+    Ingredient const& getIngredient(int number) const; 
 private:
     long roastId; 
     long beginTimestamp; 
     int eventCount;
     int ingredientsCount;
-    const Event* eventArray[EVENT_ARRAY_SIZE]; 
-    const Ingredient* ingredientArray[INGREDIENT_ARRAY_SIZE];
+    int eventArrayCapacity = INITIAL_ARRAY_SIZE;
+    int ingredientArrayCapacity = INITIAL_ARRAY_SIZE;
+    const Event* * eventArray = new const Event*[eventArrayCapacity]; 
+    const Ingredient* * ingredientArray = new const Ingredient*[ingredientArrayCapacity];
 };
