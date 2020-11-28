@@ -4,13 +4,13 @@
 #include <iostream>
 #include <string>
 
-
+/*
 void* operator new(size_t size)
 {
     std::cout << "Allocating " << size << " bytes\n";
     return malloc(size);
 }
-
+*/
 
 /* ============== Bean ================= */
 
@@ -147,39 +147,63 @@ std::string Event::getType() const
 
 /* ============== Roasts ================ */
 
-/* assignment-operator overload */
-Roast& Roast::operator=(Roast const& other)
-{
-    if (this == &other)
-    {
-        return *this;
-    }
-    this->roastId = other.roastId; 
-    this->beginTimestamp = other.beginTimestamp;
-    this->eventCount = other.eventCount;
-    this->ingredientsCount = other.ingredientsCount;
-    for (int i=0; i<other.eventCount; i++)
-    {
-        this->eventArray[i] = new Event(other.getEvent(i));
-    }
-    for (int i=0; i<other.ingredientsCount; i++)
-    {
-        this->ingredientArray[i] = new Ingredient(other.getIngredient(i));
-    }
-    return *this;
-}
-
-/* copy-constructor */
-Roast::Roast(Roast const& other)
-{
-    *this = other;
-}
-
 /* user-defined constructor */
 Roast::Roast(long inputId, long inputBeginTimestamp) 
 {
     roastId = inputId; 
     beginTimestamp = inputBeginTimestamp;
+    eventCount = 0;
+    ingredientsCount = 0;
+}
+
+/* copy-constructor */
+Roast::Roast(Roast const& other)
+{
+    this->roastId = other.roastId; 
+    this->beginTimestamp = other.beginTimestamp;
+    this->eventCount = other.eventCount;
+    this->ingredientsCount = other.ingredientsCount;
+    for (auto i=0; i<other.eventCount; i++)
+    {
+        this->eventArray[i] = new Event(other.getEvent(i));
+    }
+    for (auto i=0; i<other.ingredientsCount; i++)
+    {
+        this->ingredientArray[i] = new Ingredient(other.getIngredient(i));
+    }
+}
+
+/* assignment-operator overload */
+Roast& Roast::operator=(Roast const& other)
+{
+    /* check if this and other are the identical */
+    if (this == &other)
+    {
+        return *this;
+    }
+    /* delete the existing (if any) objects */
+    for (auto i=0; i<(this->eventCount); i++)
+    {
+        delete this->eventArray[i];
+    }
+    for (auto i=0; i<(this->ingredientsCount); i++)
+    {
+        delete this->ingredientArray[i];
+    }
+    /* copy! */
+    this->eventCount = other.eventCount;
+    this->roastId = other.roastId; 
+    this->beginTimestamp = other.beginTimestamp;
+    this->ingredientsCount = other.ingredientsCount;
+    for (auto i=0; i<(this->eventCount); i++)
+    {
+        this->eventArray[i] = new Event(other.getEvent(i));
+    }
+    for (auto i=0; i<(this->ingredientsCount); i++)
+    {
+        this->ingredientArray[i] = new Ingredient(other.getIngredient(i));
+    }
+    return *this;
 }
 
 Roast::~Roast()
@@ -189,7 +213,6 @@ Roast::~Roast()
     {
         delete eventArray[i];
     }
-
     /* delete all ingredients */
     for (int i=0; i<ingredientsCount; i++)
     {
@@ -235,12 +258,11 @@ void Roast::addIngredient(const Ingredient& ingredient)
 
 void Roast::removeEventByTimestamp(long eventTimestamp)
 {
-    for (int i=0; i<eventCount; i++)
+    for (auto i=0; i<eventCount; i++)
     {
-        if (eventArray[i]->getTimestamp() == eventTimestamp)
+        if ((eventArray[i] != nullptr) && (eventArray[i]->getTimestamp() == eventTimestamp))
         {
-            /* remove this event and replace it with last event in the array*/
-            delete eventArray[i]; // deletes event object and its eventValue object
+            delete eventArray[i]; // deletes event
             eventCount--;
             for (int j=i; j<eventCount; j++)
             {
@@ -249,15 +271,16 @@ void Roast::removeEventByTimestamp(long eventTimestamp)
                 /* set the duplicated pointer at the end of the array to 0 */
                 eventArray[j+1] = nullptr;
             }
+            break;
         } 
     }
 }
 
 void Roast::removeIngredientByBeanName(std::string beanName)
 {
-    for (int i=0; i<ingredientsCount; i++)
+    for (auto i=0; i<ingredientsCount; i++)
     {
-        if (ingredientArray[i]->getBean().getName() == beanName)
+        if ((ingredientArray[i] != nullptr) && (ingredientArray[i]->getBean().getName() == beanName))
         {
             /* remove this event and replace it with last event in the array*/
             delete ingredientArray[i]; // deletes ingredient object and its bean object
@@ -270,6 +293,7 @@ void Roast::removeIngredientByBeanName(std::string beanName)
                 ingredientArray[j+1] = nullptr;
             }
         } 
+        break;
     }
 }
 

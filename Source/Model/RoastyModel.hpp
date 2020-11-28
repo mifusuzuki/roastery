@@ -83,8 +83,8 @@ public:
 private:
     long roastId; 
     long beginTimestamp; 
-    int eventCount = 0;
-    int ingredientsCount = 0;
+    int eventCount;
+    int ingredientsCount;
     const Event* eventArray[EVENT_ARRAY_SIZE]; 
     const Ingredient* ingredientArray[INGREDIENT_ARRAY_SIZE];
 };
