@@ -4,7 +4,6 @@
 #include <string>
 
 #define INITIAL_ARRAY_SIZE 2
-#define DEFAULT_EVENT_VALUE 0
 
 /* ============== Bean ================= */
 class Bean 
