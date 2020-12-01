@@ -7,35 +7,42 @@
 
 /* ============== Bean ================= */
 
-/* user-defined constructor */
-Bean::Bean(std::string inputBeanName) 
+Bean::Bean(std::string inputBeanName) : 
+    beanName(inputBeanName) 
+{}
+
+Bean::Bean(Bean const& other) : 
+    beanName(other.getName()) 
+{}
+
+Bean& 
+Bean::operator=(Bean const& other) 
 {
-    beanName = inputBeanName; 
+    /* assign new data */
+    this->beanName = other.getName();
+    return *this;
 }
 
-std::string Bean::getName() const
+std::string 
+Bean::getName() const
 {
     return beanName;
 }
 
 /* ============== Ingredients ================ */
 
-/* user-defined constructor */
-Ingredient::Ingredient(const Bean& inputBean, int inputAmount) 
-{
-    bean = &inputBean; 
-    amount = inputAmount;
-}
+Ingredient::Ingredient(Bean& inputBean, int inputAmount) : 
+    bean(inputBean), 
+    amount(inputAmount) 
+{}
 
-/* copy-constructor */
-Ingredient::Ingredient(Ingredient const& other)
-{
-    this->bean = new Bean(other.getBean());
-    this->amount = other.getAmount();
-}
+Ingredient::Ingredient(Ingredient const& other) : 
+    bean(*(new Bean(other.getBean()))), 
+    amount(other.getAmount()) 
+{}
 
-/* assignment-operator overload */
-Ingredient& Ingredient::operator=(Ingredient const& other)
+Ingredient& 
+Ingredient::operator=(Ingredient const& other)
 {
     /* check if this and other are the identical */
     if (this == &other)
@@ -43,68 +50,78 @@ Ingredient& Ingredient::operator=(Ingredient const& other)
         return *this;
     }
     /* delete the existing Bean object */
-    delete this->bean;
+    delete &this->bean;
     /* assign new data */
-    this->bean = new Bean(other.getBean());
+    this->bean = *(new Bean(other.getBean()));
     this->amount = other.getAmount();
     return *this;
 }
 
 Ingredient::~Ingredient()
 {
-    delete bean;
+    delete &bean;
 }
 
-int Ingredient::getAmount() const
+int 
+Ingredient::getAmount() const
 {
     return amount;
 }
 
-Bean const& Ingredient::getBean() const
+Bean const& 
+Ingredient::getBean() const
 {
-    return *bean;
+    return bean;
 }
 
 /* ============== Event Value ================ */
 
-/* user-defined constructor */
-EventValue::EventValue(int inputEventValue) 
+EventValue::EventValue(int inputEventValue) : 
+    eventValue(inputEventValue) 
+{}
+
+EventValue::EventValue(EventValue const& other) : 
+    eventValue(other.getValue()) 
+{}
+
+EventValue& 
+EventValue::operator=(EventValue const& other) 
 {
-    eventValue = inputEventValue; 
+    /* assign new data */
+    this->eventValue = other.getValue();
+    return *this;
 }
 
-int EventValue::getValue() const
+int 
+EventValue::getValue() const
 {
     return eventValue;
 }
 
 /* ============== Event ================ */
 
-/* user-defined constructor */
-Event::Event(std::string inputType, long inputTimestamp, EventValue* inputEventValue) 
-{
-    type = inputType; 
-    timestamp = inputTimestamp; 
-    eventValue = inputEventValue; 
-}
+Event::Event(std::string inputType, long inputTimestamp, EventValue* inputEventValue) :
+    type(inputType),
+    timestamp(inputTimestamp),
+    eventValue(inputEventValue) 
+{}
 
-/* copy-constructor */
 Event::Event(Event const& other)
 {
     this->timestamp = other.getTimestamp();
     this->type = other.getType();
-    if (!other.hasValue())
+    if (other.hasValue())
     {
-        eventValue = nullptr;
+        this->eventValue = new EventValue(*other.getValue());
     }
     else
     {
-        this->eventValue = new EventValue(*other.eventValue);
+        eventValue = nullptr;
     }
 }
 
-/* assignment-operator overload */
-Event& Event::operator=(Event const& other)
+Event& 
+Event::operator=(Event const& other)
 {
     /* check if this and other are the identical */
     if (this == &other)
@@ -114,13 +131,13 @@ Event& Event::operator=(Event const& other)
     /* assign new data */
     this->timestamp = other.getTimestamp();
     this->type = other.getType();
-    if (!other.hasValue())
+    if (other.hasValue())
     {
-        eventValue = nullptr;
+        this->eventValue = new EventValue(*other.getValue());
     }
     else
     {
-        this->eventValue = new EventValue(*other.eventValue);
+        eventValue = nullptr;
     }
     return *this;
 }
@@ -130,7 +147,8 @@ Event::~Event()
     delete eventValue;
 }
 
-bool Event::hasValue()const
+bool 
+Event::hasValue()const
 {
     if (eventValue == nullptr)
     {
@@ -139,24 +157,26 @@ bool Event::hasValue()const
     return true;
 }
 
-long Event::getTimestamp() const 
+long 
+Event::getTimestamp() const 
 {
     return timestamp;
 }
 
-EventValue* Event::getValue() const
+EventValue* 
+Event::getValue() const
 {
     return eventValue;
 }
 
-std::string Event::getType() const
+std::string 
+Event::getType() const
 {
     return type;
 }
 
 /* ============== Roasts ================ */
 
-/* user-defined constructor */
 Roast::Roast(long inputId, long inputBeginTimestamp) 
 {
     roastId = inputId; 
@@ -165,7 +185,6 @@ Roast::Roast(long inputId, long inputBeginTimestamp)
     ingredientsCount = 0;
 }
 
-/* copy-constructor */
 Roast::Roast(Roast const& other)
 {
     this->roastId = other.getId(); 
@@ -182,8 +201,8 @@ Roast::Roast(Roast const& other)
     }
 }
 
-/* assignment-operator overload */
-Roast& Roast::operator=(Roast const& other)
+Roast& 
+Roast::operator=(Roast const& other)
 {
     /* check if this and other are the identical */
     if (this == &other)
@@ -231,27 +250,32 @@ Roast::~Roast()
     delete[] ingredientArray;
 }
 
-long Roast::getId() const
+long 
+Roast::getId() const
 {
     return roastId;
 }
 
-int Roast::getIngredientsCount() const 
+int 
+Roast::getIngredientsCount() const 
 {
     return ingredientsCount;
 }
 
-int Roast::getEventCount() const
+int 
+Roast::getEventCount() const
 {
     return eventCount;
 }
 
-long Roast::getTimestamp() const
+long 
+Roast::getTimestamp() const
 {
     return beginTimestamp;
 }
 
-void Roast::addEvent(const Event& event) 
+void 
+Roast::addEvent(const Event& event) 
 {
     /* check the identical event does not exit already */
     for (int ptr=0; ptr<eventCount; ptr++)
@@ -284,7 +308,8 @@ void Roast::addEvent(const Event& event)
     return;
 }
 
-void Roast::addIngredient(const Ingredient& ingredient)
+void 
+Roast::addIngredient(const Ingredient& ingredient)
 {
     /* check the identical event does not exit already */
     for (int ptr=0; ptr<ingredientsCount; ptr++)
@@ -344,7 +369,8 @@ void Roast::removeEventByTimestamp(long eventTimestamp)
     return;
 }
 
-void Roast::removeIngredientByBeanName(std::string beanName)
+void 
+Roast::removeIngredientByBeanName(std::string beanName)
 {
     for (auto i=0; i<ingredientsCount; i++)
     {
@@ -372,12 +398,14 @@ void Roast::removeIngredientByBeanName(std::string beanName)
     return;
 }
 
-Event const& Roast::getEvent(int number) const
+Event const& 
+Roast::getEvent(int number) const
 {
     return *eventArray[number];
 }
 
-Ingredient const& Roast::getIngredient(int number) const
+Ingredient const& 
+Roast::getIngredient(int number) const
 {
     return *ingredientArray[number];
 }
