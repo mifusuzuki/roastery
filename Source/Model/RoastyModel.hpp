@@ -1,91 +1,141 @@
 /* Roasty Model Header */
+
 #pragma once
 
 #include <string>
 
-
-// Initial array size of 6 is assumed since there are 
-// 6 events that could take place in any roasting proccess 
+/* Initial array size of 6 is assumed since there are six
+events that could take place in any roasting proccess */
 #define INITIAL_ARRAY_SIZE 6
 
-/* ============== Bean ================= */
+/***********************************************
+                    Bean  
+************************************************/
+
 class Bean 
 {
 public:
-    Bean(std::string inputBeanName); // constructor
-    Bean(Bean const& other); // copy-constructor
-    Bean& operator=(Bean const& other); // overload assignment operator
-    ~Bean(){} // destructor
+    /* Constructor */
+    Bean(std::string inputBeanName); 
+    /* Copy-constructor */
+    Bean(Bean const& other); 
+    /* Overload assignment operator */
+    Bean& operator=(Bean const& other); 
+    /* Destructor */
+    ~Bean(){} 
+    /* Getter function for beanName */
     std::string getName() const; 
 private:
     std::string beanName; 
 };
 
-/* ============== Ingredients ================ */
+/***********************************************
+                 Ingredient 
+ * Ingredient has the ownership of bean objects 
+************************************************/
 
 class Ingredient 
 {
 public:
-    Ingredient(Bean& inputBean, int inputNewAmount); // user-dfined constructor 
-    Ingredient(Ingredient const& other); // copy-constructor
-    Ingredient& operator=(Ingredient const& other); // overload assignment operator
-    ~Ingredient(); // destructor
+    /* Constructor */   
+    Ingredient(Bean& inputBean, int inputNewAmount); 
+    /* Copy-constructor */
+    Ingredient(Ingredient const& other); 
+    /* Overload assignment operator */
+    Ingredient& operator=(Ingredient const& other); 
+    /* Destructor */
+    ~Ingredient();
+    /* Getter function for amount */
     int getAmount() const; 
+    /* Getter function for bean object */
     Bean const& getBean() const;
 private:
     int amount; 
-    /* Ingredient has the ownership of Bean objects */
-    Bean& bean; 
+    Bean& bean; // Owned by Ingredient object
+     
 };
 
-// ============== Event Value ================ */
+/*******************************************
+                 EventValue  
+*******************************************/
 
 class EventValue
 {
 public:
-    EventValue(int inputEventValue); // user-defined constructor
-    EventValue(EventValue const& other); // copy-constructor
-    EventValue& operator=(EventValue const& other); // overload assignment operator
+    /* Constructor */
+    EventValue(int inputEventValue); 
+    /* Copy-constructor */
+    EventValue(EventValue const& other); 
+    /* Overload assignment operator */
+    EventValue& operator=(EventValue const& other);
+    /* Destructor */
+    ~EventValue(){} 
+    /* Getter function for eventValue */
     int getValue() const; 
 private:
     int eventValue; 
 };
 
-/* ============== Event ================ */
+/***********************************************
+                   Event
+ * Event has the ownership of EventValue objects 
+************************************************/
 
 class Event 
 {
 public:
-    Event(std::string inputType, long inputTimestamp, EventValue* inputEventValue = nullptr); // user-defined constructor
-    Event(Event const& other); // copy-constructor
-    Event& operator=(Event const& other); // overload assignment operator
-    ~Event(); // destructor
+    /* Constructor */
+    Event(std::string inputType, long inputTimestamp, EventValue* inputEventValue = nullptr); 
+    /* Copy-constructor */
+    Event(Event const& other); 
+    /* Overload assignment operator */
+    Event& operator=(Event const& other);
+    /* Utility function to transfer all class member data from existing event to new/existing event */
+    void dataTransfer(Event const& other);
+    /* Destructor */ 
+    ~Event(); 
+    /* Bool check if object has eventValue - returns true if it does and false otherwise */
     bool hasValue()const; 
+    /* Getter function for timestamp */
     long getTimestamp() const; 
+    /* Getter function for eventValue object */
     EventValue* getValue() const; 
+    /* Getter function for type */
     std::string getType() const; 
     
 private:
     long timestamp; 
     std::string type; 
-    /* Event has the ownership of EventValue objects */
-    EventValue* eventValue; 
-
+    EventValue* eventValue; // Owned by Ingredient object
 };
 
-/* ============== Roasts ================ */
+/***********************************************
+                   Roast
+ * Roast has the ownership ot Event objects 
+ * Roast has the ownership ot Ingredient objects 
+************************************************/
 
 class Roast 
 {
 public:
-    Roast(long inputId, long inputBeginTimestamp); // user-defined constructor
-    Roast(Roast const& other); // copy-constructor
-    Roast& operator=(Roast const& other); // overload assignment operator
-    ~Roast(); // destructor
+    /* Constructor */
+    Roast(long inputId, long inputBeginTimestamp); 
+    /* Copy-constructor */
+    Roast(Roast const& other); 
+    /* Overload assignment operator */
+    Roast& operator=(Roast const& other);
+    /* Utility function to transfer all class member data from existing roast to new/existing roast */
+    void dataTransfer(Roast const& other);
+    /* Destructor */ 
+    ~Roast(); 
+    /* Getter function for roastId */
     long getId() const; 
-    int getIngredientsCount() const;
-    int getEventCount() const; 
+    /* Getter function for beginTimeStamp */
     long getTimestamp() const;
+    /* Getter function for eventCount */
+    int getEventCount() const; 
+    /* Getter function for ingredientCount */
+    int getIngredientsCount() const;
     void addEvent(const Event& event); 
     void addIngredient(const Ingredient& ingredient); 
     void removeEventByTimestamp(long eventTimestamp); 
@@ -99,13 +149,13 @@ private:
     int ingredientsCount;
     int eventArrayCapacity = INITIAL_ARRAY_SIZE;
     int ingredientArrayCapacity = INITIAL_ARRAY_SIZE;
-    /* Roast has the ownership ot these objects- delete them */
-    const Event* * eventArray = new const Event*[eventArrayCapacity]; 
-    const Ingredient* * ingredientArray = new const Ingredient*[ingredientArrayCapacity];
-    /* 
-    DEAR MARKER
+    /* Dynamically allocated array containing pointers to dynamically allocated Event objects */
+    const Event* * eventArray = new const Event*[eventArrayCapacity]; // Owned by Roast object
+    /* Dynamically allocated array containing pointers to dynamically allocated Ingredient objects */
+    const Ingredient* * ingredientArray = new const Ingredient*[ingredientArrayCapacity]; // Owned by Roast object
+    
+    /* DEAR MARKER
     Ideally, I would implment the above resizable arrays by writing my own templated class
     (or just using std::vector) but since we are not allowed to use templates at all 
-    I incooperated the "resizability" into addIngredient() and addEvent().
-    */
+    I incooperated the "resizability" into addIngredient() and addEvent(). */
 };

@@ -1,7 +1,7 @@
 /* Roasty Model Implementation */
+
 #include "RoastyModel.hpp"
 
-#include <iostream>
 #include <string>
 
 
@@ -18,7 +18,7 @@ Bean::Bean(Bean const& other) :
 Bean& 
 Bean::operator=(Bean const& other) 
 {
-    /* assign new data */
+    // assign new data 
     this->beanName = other.getName();
     return *this;
 }
@@ -44,16 +44,17 @@ Ingredient::Ingredient(Ingredient const& other) :
 Ingredient& 
 Ingredient::operator=(Ingredient const& other)
 {
-    /* check if this and other are the identical */
+    // Check if this and other are the identical
     if (this == &other)
     {
         return *this;
     }
-    /* delete the existing Bean object */
+    // Delete the existing Bean object 
     delete &this->bean;
-    /* assign new data */
+    // Assign new data 
     this->bean = *(new Bean(other.getBean()));
     this->amount = other.getAmount();
+
     return *this;
 }
 
@@ -87,7 +88,7 @@ EventValue::EventValue(EventValue const& other) :
 EventValue& 
 EventValue::operator=(EventValue const& other) 
 {
-    /* assign new data */
+    // Assign new data 
     this->eventValue = other.getValue();
     return *this;
 }
@@ -108,27 +109,31 @@ Event::Event(std::string inputType, long inputTimestamp, EventValue* inputEventV
 
 Event::Event(Event const& other)
 {
-    this->timestamp = other.getTimestamp();
-    this->type = other.getType();
-    if (other.hasValue())
-    {
-        this->eventValue = new EventValue(*other.getValue());
-    }
-    else
-    {
-        eventValue = nullptr;
-    }
+    dataTransfer(other);
 }
 
 Event& 
 Event::operator=(Event const& other)
 {
-    /* check if this and other are the identical */
+    //Check if this and other are the identical 
     if (this == &other)
     {
         return *this;
     }
-    /* assign new data */
+    // Delete the existing EventValue object
+    if (other.hasValue())
+    {
+        delete other.getValue();
+    }
+    // Assign new data
+    dataTransfer(other); 
+
+    return *this;
+}
+
+void 
+Event::dataTransfer(Event const& other)
+{
     this->timestamp = other.getTimestamp();
     this->type = other.getType();
     if (other.hasValue())
@@ -139,7 +144,6 @@ Event::operator=(Event const& other)
     {
         eventValue = nullptr;
     }
-    return *this;
 }
 
 Event::~Event()
@@ -187,29 +191,18 @@ Roast::Roast(long inputId, long inputBeginTimestamp)
 
 Roast::Roast(Roast const& other)
 {
-    this->roastId = other.getId(); 
-    this->beginTimestamp = other.getTimestamp();
-    this->eventCount = other.getEventCount();
-    this->ingredientsCount = other.getIngredientsCount();
-    for (auto i=0; i<other.getEventCount(); i++)
-    {
-        this->eventArray[i] = new Event(other.getEvent(i));
-    }
-    for (auto i=0; i<other.getIngredientsCount(); i++)
-    {
-        this->ingredientArray[i] = new Ingredient(other.getIngredient(i));
-    }
+    dataTransfer(other);
 }
 
 Roast& 
 Roast::operator=(Roast const& other)
 {
-    /* check if this and other are the identical */
+    // Check if this and other are the identical 
     if (this == &other)
     {
         return *this;
     }
-    /* delete the existing objects (if any) */
+    // Delete the existing objects 
     for (auto i=0; i<(this->eventCount); i++)
     {
         delete this->eventArray[i];
@@ -218,7 +211,15 @@ Roast::operator=(Roast const& other)
     {
         delete this->ingredientArray[i];
     }
-    /* assign new data */
+    // Assign new data 
+    dataTransfer(other);
+
+    return *this;
+}
+
+void 
+Roast::dataTransfer(Roast const& other)
+{
     this->eventCount = other.getEventCount();
     this->roastId = other.getId(); 
     this->beginTimestamp = other.getTimestamp();
@@ -231,18 +232,17 @@ Roast::operator=(Roast const& other)
     {
         this->ingredientArray[i] = new Ingredient(other.getIngredient(i));
     }
-    return *this;
 }
 
 Roast::~Roast()
 {
-    /* delete all events */
+    // Delete all events 
     for (int i=0; i<eventCount; i++)
     {
         delete eventArray[i];
     }
     delete[] eventArray;
-    /* delete all ingredients */
+    // Delete all ingredients 
     for (int i=0; i<ingredientsCount; i++)
     {
         delete ingredientArray[i];
@@ -256,10 +256,10 @@ Roast::getId() const
     return roastId;
 }
 
-int 
-Roast::getIngredientsCount() const 
+long 
+Roast::getTimestamp() const
 {
-    return ingredientsCount;
+    return beginTimestamp;
 }
 
 int 
@@ -268,26 +268,26 @@ Roast::getEventCount() const
     return eventCount;
 }
 
-long 
-Roast::getTimestamp() const
+int 
+Roast::getIngredientsCount() const 
 {
-    return beginTimestamp;
+    return ingredientsCount;
 }
 
 void 
 Roast::addEvent(const Event& event) 
 {
-    /* check the identical event does not exit already */
+    // Check the identical event does not exit already 
     for (int ptr=0; ptr<eventCount; ptr++)
     {
         if (eventArray[ptr] == &event)
         {
-            /* identical event object exits already */
+            // Identical event object exits already 
             return;
         }
     }
     
-    /* hit the cap limit - double the size of array and transfer data */  
+    // Hit the cap limit - double the size of array and transfer data 
     const Event* * temp;
     if (eventCount >= eventArrayCapacity)
     {
@@ -302,7 +302,7 @@ Roast::addEvent(const Event& event)
         temp = nullptr;
     }
 
-    /* add */
+    // Add 
     eventArray[eventCount] = &event; 
     eventCount++;
     return;
@@ -311,16 +311,16 @@ Roast::addEvent(const Event& event)
 void 
 Roast::addIngredient(const Ingredient& ingredient)
 {
-    /* check the identical event does not exit already */
+    // Check the identical event does not exit already 
     for (int ptr=0; ptr<ingredientsCount; ptr++)
     {
         if (ingredientArray[ptr] == &ingredient)
         {
-            /* identical event object exits already */
+            // Identical event object exits already 
             return;
         }
     }
-    /* hit the cap limit - double the size of array and transfer data */  
+    // Hit the cap limit - double the size of array and transfer data 
     const Ingredient* * temp;
     if (ingredientsCount >= ingredientArrayCapacity)
     {
@@ -335,32 +335,33 @@ Roast::addIngredient(const Ingredient& ingredient)
         temp = nullptr;
     }
 
-    /* add */
+    // Add 
     ingredientArray[ingredientsCount] = &ingredient; 
     ingredientsCount++;
     return;
 }
 
-void Roast::removeEventByTimestamp(long eventTimestamp)
+void 
+Roast::removeEventByTimestamp(long eventTimestamp)
 {
     for (auto i=0; i<eventCount; i++)
     {
         if ((eventArray[i] != nullptr) && (eventArray[i]->getTimestamp() == eventTimestamp))
         {
             /* 
-            TASK - remove this event and replace it with last event in the array
-            SOFT ASSUMPTION - there wont be too many elements 
+            TASK - Remove this event and replace it with last event in the array
+            SOFT ASSUMPTION - There wont be too many elements 
             in the array to cause too much computational inefficiency 
-            ALTERNATIVE SOLUTION - take the last element and replace 
+            ALTERNATIVE SOLUTION - Take the last element and replace 
             the removed element and decrement the counter by one 
             */
             delete eventArray[i];
             eventCount--;
             for (int j=i; j<eventCount; j++)
             {
-                /* shift each element one by one */
+                // Shift each element one by one 
                 eventArray[j] = eventArray[j+1];
-                /* set the duplicated pointer at the end of the array to 0 */
+                // Set the duplicated pointer at the end of the array to 0 
                 eventArray[j+1] = nullptr;
             }
             break;
@@ -377,19 +378,19 @@ Roast::removeIngredientByBeanName(std::string beanName)
         if ((ingredientArray[i] != nullptr) && (ingredientArray[i]->getBean().getName() == beanName))
         {
             /* 
-            TASK - remove this ingredient and replace it with last event in the array
-            SOFT ASSUMPTION - there wont be too many elements 
+            TASK - Remove this ingredient and replace it with last event in the array
+            SOFT ASSUMPTION - There wont be too many elements 
             in the array to cause too much computational inefficiency 
-            ALTERNATIVE SOLUTION - take the last element and replace 
+            ALTERNATIVE SOLUTION - Take the last element and replace 
             the removed element and decrement the counter by one 
             */
             delete ingredientArray[i]; 
             ingredientsCount--;
             for (int j=i; j<ingredientsCount; j++)
             {
-                /* shift each element one by one */
+                // Shift each element one by one 
                 ingredientArray[j] = ingredientArray[j+1];
-                /* set the duplicated pointer at the end of the array to 0 */
+                // Set the duplicated pointer at the end of the array to 0 
                 ingredientArray[j+1] = nullptr;
             }
         } 
