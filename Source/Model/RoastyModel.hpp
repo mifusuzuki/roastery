@@ -28,6 +28,7 @@ public:
     ~Bean(){} 
 
 private:
+
     std::string beanName; 
 };
 
@@ -57,6 +58,7 @@ public:
     ~Ingredient();
 
 private:
+
     int amount; 
     Bean& bean; // Owned by Ingredient object
      
@@ -82,6 +84,7 @@ public:
     ~EventValue(){} 
 
 private:
+
     int eventValue; 
 };
 
@@ -122,6 +125,7 @@ public:
     ~Event(); 
 
 private:
+
     long timestamp; 
     std::string type; 
     EventValue* eventValue; // Owned by Ingredient object
@@ -188,6 +192,7 @@ public:
     ~Roast();
 
 private:
+
     long roastId; 
     long beginTimestamp; 
     int eventCount;

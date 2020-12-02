@@ -49,8 +49,10 @@ Ingredient::operator=(Ingredient const& other)
     {
         return *this;
     }
+
     // Delete the existing Bean object 
     delete &this->bean;
+
     // Assign new data 
     this->bean = *(new Bean(other.getBean()));
     this->amount = other.getAmount();
@@ -121,11 +123,13 @@ Event::operator=(Event const& other)
     {
         return *this;
     }
+
     // Delete the existing EventValue object
     if (other.hasValue())
     {
         delete other.getValue();
     }
+
     // Copy over other's data to this object 
     dataTransfer(other); 
 
@@ -136,8 +140,10 @@ void
 Event::dataTransfer(Event const& other)
 {
     // Copy timestamp, type and eventValue
+
     this->timestamp = other.getTimestamp();
     this->type = other.getType();
+
     if (other.hasValue())
     {
         this->eventValue = new EventValue(*other.getValue());
@@ -206,6 +212,7 @@ Roast::Roast(Roast const& other)
     this->ingredientArrayCapacity = INITIAL_ARRAY_SIZE;
     this->eventArray = new const Event*[eventArrayCapacity];
     this->ingredientArray = new const Ingredient*[ingredientArrayCapacity];
+
     // Assign other's data to this object 
     dataTransfer(other);
 }
@@ -218,16 +225,19 @@ Roast::operator=(Roast const& other)
     {
         return *this;
     }
+
     // Delete the existing objects in the existing event array
     for (auto i=0; i<(this->eventCount); i++)
     {
         delete this->eventArray[i];
     }
+
     // Delete the existing objects in the existing ingredient array
     for (auto i=0; i<(this->ingredientsCount); i++)
     {
         delete this->ingredientArray[i];
     }
+
     // Copy over other's data to this object 
     dataTransfer(other);
 
@@ -240,9 +250,11 @@ Roast::dataTransfer(Roast const& other)
     // copy roastId and beginTimestamp
     this->roastId = other.getId(); 
     this->beginTimestamp = other.getTimestamp();
+
     // Set/reset the counters to 0
     this->eventCount = 0;
     this->ingredientsCount = 0;
+
     // Copy eventArray elements one by one
     for (auto i=0; i<(other.getEventCount()); i++)
     {
@@ -250,6 +262,7 @@ Roast::dataTransfer(Roast const& other)
         // object to eventArray and increment eventCount by one
         this->addEvent(*(new Event(other.getEvent(i))));
     }
+
     // Copy ingredientArray elements one by one
     for (auto i=0; i<(other.getIngredientsCount()); i++)
     {
@@ -301,11 +314,14 @@ Roast::addEvent(const Event& event)
     if (eventCount >= eventArrayCapacity)
     {
         temp = new const Event*[2*eventArrayCapacity];
+
         for (int i=0; i<eventArrayCapacity; i++)
         {
             temp[i] = eventArray[i];
         }
+
         delete[] eventArray;
+        
         eventArrayCapacity *= 2;
         eventArray = temp;
         temp = nullptr;
@@ -335,11 +351,14 @@ Roast::addIngredient(const Ingredient& ingredient)
     if (ingredientsCount >= ingredientArrayCapacity)
     {
         temp = new const Ingredient*[2*ingredientArrayCapacity];
+
         for (int i=0; i<ingredientArrayCapacity; i++)
         {
             temp[i] = ingredientArray[i];
         }
+
         delete[] ingredientArray;
+
         ingredientArrayCapacity *= 2;
         ingredientArray = temp;
         temp = nullptr;
@@ -365,12 +384,15 @@ Roast::removeEventByTimestamp(long eventTimestamp)
             ALTERNATIVE SOLUTION - Take the last element and replace 
             the removed element and decrement the counter by one 
             */
+
             delete eventArray[i];
             eventCount--;
+
             for (int j=i; j<eventCount; j++)
             {
                 // Shift each element one by one 
                 eventArray[j] = eventArray[j+1];
+
                 // Set the duplicated pointer at the end of the array to 0 
                 eventArray[j+1] = nullptr;
             }
@@ -394,12 +416,15 @@ Roast::removeIngredientByBeanName(std::string beanName)
             ALTERNATIVE SOLUTION - Take the last element and replace 
             the removed element and decrement the counter by one 
             */
+
             delete ingredientArray[i]; 
             ingredientsCount--;
+
             for (int j=i; j<ingredientsCount; j++)
             {
                 // Shift each element one by one 
                 ingredientArray[j] = ingredientArray[j+1];
+
                 // Set the duplicated pointer at the end of the array to 0 
                 ingredientArray[j+1] = nullptr;
             }
@@ -429,6 +454,7 @@ Roast::~Roast()
         delete eventArray[i];
     }
     delete[] eventArray;
+
     // Delete all heap allocated ingredients and the array 
     for (int i=0; i<ingredientsCount; i++)
     {
