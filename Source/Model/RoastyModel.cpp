@@ -181,16 +181,26 @@ Event::getType() const
 
 /* ============== Roasts ================ */
 
-Roast::Roast(long inputId, long inputBeginTimestamp) 
-{
-    roastId = inputId; 
-    beginTimestamp = inputBeginTimestamp;
+Roast::Roast(long inputId, long inputBeginTimestamp) :
+
+    roastId(inputId), 
+    beginTimestamp(inputBeginTimestamp)
+    
+{   
     eventCount = 0;
     ingredientsCount = 0;
+    eventArrayCapacity = INITIAL_ARRAY_SIZE;
+    ingredientArrayCapacity = INITIAL_ARRAY_SIZE;
+    eventArray = new const Event*[eventArrayCapacity];
+    ingredientArray = new const Ingredient*[ingredientArrayCapacity];
 }
 
 Roast::Roast(Roast const& other)
 {
+    this->eventArrayCapacity = INITIAL_ARRAY_SIZE;
+    this->ingredientArrayCapacity = INITIAL_ARRAY_SIZE;
+    this->eventArray = new const Event*[eventArrayCapacity];
+    this->ingredientArray = new const Ingredient*[ingredientArrayCapacity];
     dataTransfer(other);
 }
 
@@ -220,17 +230,17 @@ Roast::operator=(Roast const& other)
 void 
 Roast::dataTransfer(Roast const& other)
 {
-    this->eventCount = other.getEventCount();
     this->roastId = other.getId(); 
     this->beginTimestamp = other.getTimestamp();
-    this->ingredientsCount = other.getIngredientsCount();
-    for (auto i=0; i<(this->eventCount); i++)
+    this->eventCount = 0;
+    this->ingredientsCount = 0;
+    for (auto i=0; i<(other.getEventCount()); i++)
     {
-        this->eventArray[i] = new Event(other.getEvent(i));
+        this->addEvent(*(new Event(other.getEvent(i))));
     }
-    for (auto i=0; i<(this->ingredientsCount); i++)
+    for (auto i=0; i<(other.getIngredientsCount()); i++)
     {
-        this->ingredientArray[i] = new Ingredient(other.getIngredient(i));
+        this->addIngredient(*(new Ingredient(other.getIngredient(i))));
     }
 }
 

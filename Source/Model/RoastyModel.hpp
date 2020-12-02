@@ -202,14 +202,14 @@ private:
     long beginTimestamp; 
     int eventCount;
     int ingredientsCount;
-    int eventArrayCapacity = INITIAL_ARRAY_SIZE;
-    int ingredientArrayCapacity = INITIAL_ARRAY_SIZE;
+    int eventArrayCapacity;
+    int ingredientArrayCapacity;
 
     /* Dynamically allocated array containing pointers to dynamically allocated Event objects */
-    const Event* * eventArray = new const Event*[eventArrayCapacity]; // Owned by Roast object
-    
+    const Event* * eventArray; // Owned by Roast object
+
     /* Dynamically allocated array containing pointers to dynamically allocated Ingredient objects */
-    const Ingredient* * ingredientArray = new const Ingredient*[ingredientArrayCapacity]; // Owned by Roast object
+    const Ingredient* * ingredientArray; // Owned by Roast object
     
     /* DEAR MARKER
     Ideally, I would implment the above resizable arrays by writing my own templated class
