@@ -18,7 +18,7 @@ Bean::Bean(Bean const& other) :
 Bean& 
 Bean::operator=(Bean const& other) 
 {
-    // assign new data 
+    // copy other's bean name 
     this->beanName = other.getName();
     return *this;
 }
@@ -58,11 +58,6 @@ Ingredient::operator=(Ingredient const& other)
     return *this;
 }
 
-Ingredient::~Ingredient()
-{
-    delete &bean;
-}
-
 int 
 Ingredient::getAmount() const
 {
@@ -73,6 +68,11 @@ Bean const&
 Ingredient::getBean() const
 {
     return bean;
+}
+
+Ingredient::~Ingredient()
+{
+    delete &bean;
 }
 
 /* ============== Event Value ================ */
@@ -109,6 +109,7 @@ Event::Event(std::string inputType, long inputTimestamp, EventValue* inputEventV
 
 Event::Event(Event const& other)
 {
+    // Assign other's data to this object 
     dataTransfer(other);
 }
 
@@ -125,7 +126,7 @@ Event::operator=(Event const& other)
     {
         delete other.getValue();
     }
-    // Assign new data
+    // Copy over other's data to this object 
     dataTransfer(other); 
 
     return *this;
@@ -134,6 +135,7 @@ Event::operator=(Event const& other)
 void 
 Event::dataTransfer(Event const& other)
 {
+    // Copy timestamp, type and eventValue
     this->timestamp = other.getTimestamp();
     this->type = other.getType();
     if (other.hasValue())
@@ -144,11 +146,6 @@ Event::dataTransfer(Event const& other)
     {
         eventValue = nullptr;
     }
-}
-
-Event::~Event()
-{
-    delete eventValue;
 }
 
 bool 
@@ -179,6 +176,11 @@ Event::getType() const
     return type;
 }
 
+Event::~Event()
+{
+    delete eventValue;
+}
+
 /* ============== Roasts ================ */
 
 Roast::Roast(long inputId, long inputBeginTimestamp) :
@@ -187,6 +189,7 @@ Roast::Roast(long inputId, long inputBeginTimestamp) :
     beginTimestamp(inputBeginTimestamp)
     
 {   
+    // Assign initial values and create heap allocated arrays 
     eventCount = 0;
     ingredientsCount = 0;
     eventArrayCapacity = INITIAL_ARRAY_SIZE;
@@ -197,10 +200,13 @@ Roast::Roast(long inputId, long inputBeginTimestamp) :
 
 Roast::Roast(Roast const& other)
 {
+    // Assign initial values and create heap allocated arrays 
+    // to prepare for creating a copy of "other"
     this->eventArrayCapacity = INITIAL_ARRAY_SIZE;
     this->ingredientArrayCapacity = INITIAL_ARRAY_SIZE;
     this->eventArray = new const Event*[eventArrayCapacity];
     this->ingredientArray = new const Ingredient*[ingredientArrayCapacity];
+    // Assign other's data to this object 
     dataTransfer(other);
 }
 
@@ -212,16 +218,17 @@ Roast::operator=(Roast const& other)
     {
         return *this;
     }
-    // Delete the existing objects 
+    // Delete the existing objects in the existing event array
     for (auto i=0; i<(this->eventCount); i++)
     {
         delete this->eventArray[i];
     }
+    // Delete the existing objects in the existing ingredient array
     for (auto i=0; i<(this->ingredientsCount); i++)
     {
         delete this->ingredientArray[i];
     }
-    // Assign new data 
+    // Copy over other's data to this object 
     dataTransfer(other);
 
     return *this;
@@ -230,34 +237,26 @@ Roast::operator=(Roast const& other)
 void 
 Roast::dataTransfer(Roast const& other)
 {
+    // copy roastId and beginTimestamp
     this->roastId = other.getId(); 
     this->beginTimestamp = other.getTimestamp();
+    // Set/reset the counters to 0
     this->eventCount = 0;
     this->ingredientsCount = 0;
+    // Copy eventArray elements one by one
     for (auto i=0; i<(other.getEventCount()); i++)
     {
+        // addEvent() will add the pointer to the newly created  
+        // object to eventArray and increment eventCount by one
         this->addEvent(*(new Event(other.getEvent(i))));
     }
+    // Copy ingredientArray elements one by one
     for (auto i=0; i<(other.getIngredientsCount()); i++)
     {
+        // addIngredient() will add the pointers to the newly created 
+        // object to ingredientArray and increment ingredientCount by one
         this->addIngredient(*(new Ingredient(other.getIngredient(i))));
     }
-}
-
-Roast::~Roast()
-{
-    // Delete all events 
-    for (int i=0; i<eventCount; i++)
-    {
-        delete eventArray[i];
-    }
-    delete[] eventArray;
-    // Delete all ingredients 
-    for (int i=0; i<ingredientsCount; i++)
-    {
-        delete ingredientArray[i];
-    }
-    delete[] ingredientArray;
 }
 
 long 
@@ -312,7 +311,7 @@ Roast::addEvent(const Event& event)
         temp = nullptr;
     }
 
-    // Add 
+    // Add a pointer to event to the array and increment the counter
     eventArray[eventCount] = &event; 
     eventCount++;
     return;
@@ -330,6 +329,7 @@ Roast::addIngredient(const Ingredient& ingredient)
             return;
         }
     }
+
     // Hit the cap limit - double the size of array and transfer data 
     const Ingredient* * temp;
     if (ingredientsCount >= ingredientArrayCapacity)
@@ -345,7 +345,7 @@ Roast::addIngredient(const Ingredient& ingredient)
         temp = nullptr;
     }
 
-    // Add 
+    // Add a pointer to ingredient to the array and increment the counter
     ingredientArray[ingredientsCount] = &ingredient; 
     ingredientsCount++;
     return;
@@ -421,4 +421,18 @@ Roast::getIngredient(int number) const
     return *ingredientArray[number];
 }
 
-
+Roast::~Roast()
+{
+    // Delete all heap allocated events and the array 
+    for (int i=0; i<eventCount; i++)
+    {
+        delete eventArray[i];
+    }
+    delete[] eventArray;
+    // Delete all heap allocated ingredients and the array 
+    for (int i=0; i<ingredientsCount; i++)
+    {
+        delete ingredientArray[i];
+    }
+    delete[] ingredientArray;
+}

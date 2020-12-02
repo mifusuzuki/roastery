@@ -8,52 +8,43 @@
 events that could take place in any roasting proccess */
 #define INITIAL_ARRAY_SIZE 6
 
-/***********************************************
-                    Bean  
-************************************************/
+/*******************************************************
+                          Bean  
+********************************************************/
 
 class Bean 
 {
 public:
-    /* Constructor */
-    Bean(std::string inputBeanName); 
 
-    /* Copy-constructor */
+    Bean(std::string inputBeanName);
+
     Bean(Bean const& other); 
 
-    /* Overload assignment operator */
     Bean& operator=(Bean const& other); 
-
-    /* Destructor */
-    ~Bean(){} 
 
     /* Getter function for beanName */
     std::string getName() const; 
+
+    ~Bean(){} 
 
 private:
     std::string beanName; 
 };
 
-/***********************************************
-                 Ingredient 
- * Ingredient has the ownership of bean objects 
-************************************************/
+/*******************************************************
+                       Ingredient 
+ * Ingredient object has the ownership of bean object
+********************************************************/
 
 class Ingredient 
 {
 public:
-    /* Constructor */   
+
     Ingredient(Bean& inputBean, int inputNewAmount); 
 
-    /* Copy-constructor */
     Ingredient(Ingredient const& other); 
 
-    /* Overload assignment operator */
     Ingredient& operator=(Ingredient const& other); 
-
-    /* Destructor that deletes all owned objects
-    i.e. Bean object */ 
-    ~Ingredient();
 
     /* Getter function for amount */
     int getAmount() const; 
@@ -61,62 +52,57 @@ public:
     /* Getter function for bean object */
     Bean const& getBean() const;
 
+    /* Destructor that deletes all owned objects
+    i.e. Bean object */ 
+    ~Ingredient();
+
 private:
     int amount; 
     Bean& bean; // Owned by Ingredient object
      
 };
 
-/*******************************************
-                 EventValue  
-*******************************************/
+/*******************************************************
+                      EventValue  
+********************************************************/
 
 class EventValue
 {
 public:
-    /* Constructor */
+
     EventValue(int inputEventValue); 
 
-    /* Copy-constructor */
     EventValue(EventValue const& other); 
 
-    /* Overload assignment operator */
     EventValue& operator=(EventValue const& other);
-
-    /* Destructor */
-    ~EventValue(){} 
 
     /* Getter function for eventValue */
     int getValue() const; 
+
+    ~EventValue(){} 
 
 private:
     int eventValue; 
 };
 
-/***********************************************
-                   Event
- * Event has the ownership of EventValue objects 
-************************************************/
+/*******************************************************
+                         Event
+ * Event object has the ownership of EventValue object 
+********************************************************/
 
 class Event 
 {
 public:
-    /* Constructor */
+
     Event(std::string inputType, long inputTimestamp, EventValue* inputEventValue = nullptr); 
 
-    /* Copy-constructor */
     Event(Event const& other); 
 
-    /* Overload assignment operator */
     Event& operator=(Event const& other);
 
-    /* Utility function to transfer all class member
+    /* Utility function to transfer *all* class member
      data from existing event to new/existing event */
     void dataTransfer(Event const& other);
-
-    /* Destructor that deletes all owned objects
-    i.e. EventValue object */  
-    ~Event(); 
 
     /* Bool check if object has eventValue and
     returns true if it does and false otherwise */
@@ -131,37 +117,37 @@ public:
     /* Getter function for type */
     std::string getType() const; 
     
+    /* Destructor that deletes all owned objects
+    i.e. EventValue object */  
+    ~Event(); 
+
 private:
     long timestamp; 
     std::string type; 
     EventValue* eventValue; // Owned by Ingredient object
 };
 
-/***********************************************
-                   Roast
- * Roast has the ownership ot Event objects 
- * Roast has the ownership ot Ingredient objects 
-************************************************/
+/*******************************************************
+                         Roast
+ * Roast object has the ownership ot Event objects 
+ * Roast object has the ownership of Ingredient objects 
+********************************************************/
 
 class Roast 
 {
 public:
-    /* Constructor */
+
     Roast(long inputId, long inputBeginTimestamp); 
 
-    /* Copy-constructor */
     Roast(Roast const& other); 
 
-    /* Overload assignment operator */
     Roast& operator=(Roast const& other);
 
-    /* Utility function to transfer all class member
-    data from existing roast to new/existing roast */
-    void dataTransfer(Roast const& other);
-
-    /* Destructor that deletes all owned objects
-    i.e. Event and Ingredient objects */ 
-    ~Roast(); 
+    /* Utility function to transfer *some* class member
+    data from existing roast to new/existing roast i.e. 
+    roastId, beginTimestamp, eventCount, ingredientCount,
+    eventArray and ingredientArray */
+    void dataTransfer(Roast const& other); 
 
     /* Getter function for roastId */
     long getId() const; 
@@ -197,6 +183,10 @@ public:
     /* Getter function for a specified ingredient object in ingredeintArray */
     Ingredient const& getIngredient(int number) const; 
 
+    /* Destructor that deletes all owned objects
+    i.e. Event and Ingredient objects */ 
+    ~Roast();
+
 private:
     long roastId; 
     long beginTimestamp; 
@@ -205,10 +195,10 @@ private:
     int eventArrayCapacity;
     int ingredientArrayCapacity;
 
-    /* Dynamically allocated array containing pointers to dynamically allocated Event objects */
+    /* Heap allocated array containing pointers to heap allocated Event objects */
     const Event* * eventArray; // Owned by Roast object
 
-    /* Dynamically allocated array containing pointers to dynamically allocated Ingredient objects */
+    /* Heap allocated array containing pointers to heap allocated Ingredient objects */
     const Ingredient* * ingredientArray; // Owned by Roast object
     
     /* DEAR MARKER
